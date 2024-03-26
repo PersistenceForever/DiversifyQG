@@ -96,7 +96,7 @@ def train_forward(args, iteration):
             break
     
     
-    #### if iteration>=1, 则后续在WQ上finetune一下####
+    #### if iteration>=1, then finetune####
     if iteration >= 1:
         train_pt = os.path.join(args.output_dir, 'forward_raw_train.pt')
         train_loader = DataLoader(train_pt, args.batch_size, training=True)
@@ -105,7 +105,7 @@ def train_forward(args, iteration):
             global_step = 0
             tr_loss = 0.0
             for step, batch in enumerate(train_loader):
-                #batch是一个tuple，一共包含5个类型的元素，分别是source_ids,source_mask,target_ids
+               
                 batch = tuple(t.to(device) for t in batch)
                 pad_token_id = tokenizer.pad_token_id
                 source_ids, source_mask, y = batch[0], batch[1], batch[2]
@@ -124,18 +124,18 @@ def train_forward(args, iteration):
                     optimizer.step()
                     optimizer.zero_grad()
                     global_step += 1
-            epoch_loss = tr_loss/global_step ### after each epoch, the loss value #####
+            epoch_loss = tr_loss/global_step 
             earlyStop(epoch_loss, model, args, name, iteration)   
             if 'cuda' in str(device):
-                torch.cuda.empty_cache()#释放显存
+                torch.cuda.empty_cache()
             
             out, semantic_score, diversity_score, _ = test_forward(model, tokenizer, args, iteration)  
             sim_div = diversity_score*np.exp(semantic_score - 1)                  
-            if semanticMaxScore < sim_div:  ####初始化指标,用的diverse_similarity score
+            if semanticMaxScore < sim_div: 
                 semanticMaxScore = sim_div
                 torch.save(model.module.state_dict(), os.path.join(args.output_dir, 'param_forward_WQ_' + str(iteration) +'.pt'), _use_new_zipfile_serialization = False)
                 np.savetxt(os.path.join(args.output_dir, 'forward_WQ_Val_Finetune_' + str(iteration) +'.txt'), out, fmt='%s')
-            if(earlyStop.early_stop): ####早期停止#####
+            if(earlyStop.early_stop): 
                 break
     
     
@@ -213,7 +213,7 @@ def train_backward(args, iteration):
         if(earlyStop.early_stop): ####early stop#####
             break
     
-    #### if iteration>=1, 则后续在WQ上finetune一下####
+    #### if iteration>=1, then finetune####
     if iteration >= 1:
         train_pt = os.path.join(args.output_dir, 'backward_raw_train.pt')
         train_loader = DataLoader(train_pt, args.batch_size, training=True)
@@ -222,7 +222,7 @@ def train_backward(args, iteration):
             global_step = 0
             tr_loss = 0.0
             for step, batch in enumerate(train_loader):
-                #batch是一个tuple，一共包含5个类型的元素，分别是source_ids,source_mask,target_ids
+                
                 batch = tuple(t.to(device) for t in batch)
                 pad_token_id = tokenizer.pad_token_id
                 source_ids, source_mask, y = batch[0], batch[1], batch[2]
@@ -244,14 +244,14 @@ def train_backward(args, iteration):
             epoch_loss = tr_loss/global_step ### after each epoch, the loss value
             earlyStop(epoch_loss, model, args, name, iteration)   
             if 'cuda' in str(device):
-                torch.cuda.empty_cache()#释放显存
+                torch.cuda.empty_cache()
             
             semantic_score, outs = test_backward(model, tokenizer, args, iteration)                    
-            if semanticMaxScore < semantic_score : ####初始化指标
+            if semanticMaxScore < semantic_score : 
                 semanticMaxScore = semantic_score
                 torch.save(model.module.state_dict(), os.path.join(args.output_dir, 'param_backward_WQ_' + str(iteration) +'.pt'), _use_new_zipfile_serialization = False)
                 np.savetxt(os.path.join(args.output_dir, 'backward_WQ_Val_Finetune_' + str(iteration) +'.txt'), outs, fmt='%s')
-            if(earlyStop.early_stop): ####早期停止#####
+            if(earlyStop.early_stop):
                 break    
     
     
