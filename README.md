@@ -1,3 +1,7 @@
+DiversifyQG
+====
+The Pytorch implementation of Diversifying Question Generation over Knowledge Base via External Natural Questions(LERC-COLING 2024).
+
 Requirements
 ====
 1.Environments
